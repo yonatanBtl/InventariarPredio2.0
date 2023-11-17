@@ -20,19 +20,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         db.init()
-        /*
-        var baseDatosAdmin = BaseDatosAdmin() // Crear instancia de la clase BaseDatosAdmin
-        baseDatosAdmin.iniciarConexion() // Intentar establecer la conexión
-
-        if (baseDatosAdmin.estaConectado()) {
-            // La conexión se estableció correctamente
-            // Puedes imprimir un mensaje o realizar otras acciones aquí
-            Log.e("DataBaseManager", "Conexión exitosa a la base de datos")
-        } else {
-            // La conexión no se pudo establecer
-            Log.e("DataBaseManager", "Error al conectar a la base de datos")
-        }*/
-        //BaseDatosAdmin.LeerTablaPredio()
         setContent {
             InventariarPredio20Theme {
                 // A surface container using the 'background' color from the theme

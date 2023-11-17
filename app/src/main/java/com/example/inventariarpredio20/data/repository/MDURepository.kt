@@ -6,6 +6,7 @@ import com.example.inventariarpredio20.data.tables.PredioTable
 import com.example.inventariarpredio20.data.tables.PredioMDUTable
 import com.example.inventariarpredio20.models.PredioMDU
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.max
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 
@@ -19,9 +20,19 @@ object MDURepository {
         }
     }
     suspend fun guardarMDU(mdu: PredioMDU) {
+        val nuevoIdPredioMDU = db.dbQuery {
+            PredioMDUTable
+                .slice(PredioMDUTable.idPredioMDU.max())
+                .selectAll()
+                .singleOrNull()
+                ?.get(PredioMDUTable.idPredioMDU.max()) as? Int
+        } ?: 1
+
+        val siguienteIdPredioMDU = nuevoIdPredioMDU + 1
+
         db.dbQuery {
             PredioMDUTable.insert {
-                //it[idPredioMDU] = mdu.idPredioMDU
+                it[idPredioMDU] = siguienteIdPredioMDU
                 it[idPredio] = mdu.idPredio
                 it[idMDU] = mdu.idMDU
                 it[descripcion] = mdu.descripcion

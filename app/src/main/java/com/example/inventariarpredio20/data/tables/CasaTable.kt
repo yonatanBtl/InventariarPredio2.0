@@ -6,7 +6,7 @@ object CasaTable: Table("casa") {
     val idCasa = integer("id_casa").autoIncrement()
     val idPredio = integer("id_predio") references PredioTable.idPredio
     val idEstado = integer("id_estado").autoIncrement()
-    val idPredioMdu = PredioMDUTable.integer("id_predio_mdu")
+    val idPredioMdu = integer("id_predio_mdu")
     val numero = short("numero")
     val piso = short("piso").nullable()
     val area = decimal("area", precision = 15, scale = 2)

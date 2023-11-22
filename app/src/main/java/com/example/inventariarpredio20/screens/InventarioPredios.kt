@@ -1,13 +1,13 @@
 package com.example.inventariarpredio20.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,16 +17,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -47,18 +56,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.inventariarpredio20.R
-import com.example.inventariarpredio20.data.repository.MDURepository
-import com.example.inventariarpredio20.data.repository.PredioRepository
+import com.example.inventariarpredio20.data.repository.PredioRepository.filtrarPredios
+import com.example.inventariarpredio20.data.repository.PredioRepository.obtenerDatosPredio
+import com.example.inventariarpredio20.models.Predio
+import com.example.inventariarpredio20.navigation.AppScreens
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,8 +93,13 @@ fun InventarioPredios(navController: NavController){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContenidoInventarioPredios(navController: NavController){
+    var textValue by remember { mutableStateOf("") }
     var textValue2 by remember { mutableStateOf("") }
     var textValue3 by remember { mutableStateOf("") }
+
+    var listaPredios by remember { mutableStateOf(emptyList<Predio>()) }
+    val cargando = remember { mutableStateOf(false) }
+
     Box(modifier = Modifier.padding(start = 16.dp, top = 76.dp, end = 16.dp, bottom = 16.dp)){
         Column(
             modifier = Modifier
@@ -101,7 +114,7 @@ fun ContenidoInventarioPredios(navController: NavController){
                 fontSize = 20.sp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 13.dp, top=13.dp)
+                    .padding(start = 13.dp, top = 13.dp)
                     .then(Modifier.align(Alignment.Start))
             )
 
@@ -118,7 +131,29 @@ fun ContenidoInventarioPredios(navController: NavController){
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            FiltroSeleccionInventario()
+            OutlinedTextField(
+                value = textValue,
+                onValueChange = { newValue ->
+                    textValue = newValue
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black, // Color del texto
+                    cursorColor = Color.Black, // Color del cursor
+                    focusedBorderColor = Color.Black.copy(alpha = 0.8f), // Color del borde cuando enfocado
+                    unfocusedBorderColor = Color.Black.copy(alpha = 0.4f) // Color del borde cuando no está enfocado
+                ),
+                modifier = Modifier
+                    .width(365.dp)
+                    .fillMaxWidth()
+                    .padding(start = 15.dp)
+                    .then(Modifier.align(Alignment.Start))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFFFFFFF),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 8.dp))
+            )
 
             Spacer(modifier = Modifier.height(5.dp))
 
@@ -196,106 +231,215 @@ fun ContenidoInventarioPredios(navController: NavController){
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            Button(onClick = {},colors = ButtonDefaults.buttonColors(
-                containerColor = Color.DarkGray), modifier = Modifier.width(150.dp).height(40.dp)
-                .padding(start = 15.dp)
-                .then(Modifier.align(Alignment.Start))
-                .border(
-                    width = 1.dp,
-                    color = Color(0x00000000),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .background(color = Color(0x00000000), shape = RoundedCornerShape(size = 16.dp))
-                .fillMaxWidth()
+            Button(
+                onClick = {
+                    cargando.value = true
+                }
+                ,colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.DarkGray), modifier = Modifier
+                    .width(150.dp)
+                    .height(40.dp)
+                    .padding(start = 15.dp)
+                    .then(Modifier.align(Alignment.Start))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0x00000000),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .background(color = Color(0x00000000), shape = RoundedCornerShape(size = 16.dp))
+                    .fillMaxWidth()
             ){
                 Text("Filtrar", color = White, fontSize = 15.sp)
             }
+
+            LaunchedEffect(cargando.value) {
+                if (cargando.value) {
+                    val tipoPredio = if (textValue.isNotBlank()) textValue else null
+                    val nombrePredio = if (textValue2.isNotBlank()) textValue2 else null
+                    val rucPredio = if (textValue3.isNotBlank()) textValue3 else null
+
+                    // Realizar el filtrado de predios con los valores ingresados
+                    val prediosFiltrados = filtrarPredios(tipoPredio, nombrePredio, rucPredio)
+                    listaPredios = prediosFiltrados
+                    cargando.value = false
+                }
+            }
+
+            LazyColumn {
+                items(listaPredios) { predio->
+                    TarjetaPredio(predio = predio, navController)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
             Spacer(modifier = Modifier.width(35.dp))
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FiltroSeleccionInventario(){
-    var textValue by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedName by remember { mutableStateOf("") }
 
-    val names = remember {
-        mutableStateListOf<String>()
-    }
-
-    // Llenar la lista de nombres de predios al iniciar la composición
-    LaunchedEffect(key1 = true) {
-        val mdu = MDURepository.obtenerTipoMDU()
-        names.clear()
-        names.addAll(mdu)
-    }
-
-    val searchText = textValue.text
-    val filteredNames = names.filter { it.contains(searchText, ignoreCase = true) }
-
-    Column {
-        OutlinedTextField(
-            value = textValue,
-            onValueChange = {
-                textValue = it
-                if (it.text.isEmpty()) {
-                    selectedName = ""
-                }
-            },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    selectedName = textValue.text
-                }
-            ),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = Color.Black, // Color del texto
-                cursorColor = Color.Black, // Color del cursor
-                focusedBorderColor = Color.Black.copy(alpha = 0.8f), // Color del borde cuando enfocado
-                unfocusedBorderColor = Color.Black.copy(alpha = 0.4f) // Color del borde cuando no está enfocado
-            ),
-            modifier = Modifier
-                .width(350.dp)
-                .fillMaxWidth()
-                .then(Modifier.align(Alignment.Start))
-                .border(
-                    width = 1.dp,
-                    color = Color(0xFFFFFFFF),
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 8.dp))
-        )
-        if (searchText.isNotBlank() && selectedName.isEmpty()) {
-            LazyColumn(modifier = Modifier.width(350.dp).background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 8.dp))) {
-                items(filteredNames) { name ->
-                    Text(
-                        text = name,
-                        fontSize = 18.sp,
-                        color = Color(0xFF000000),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .clickable {
-                                selectedName = name
-                                textValue = textValue.copy(
-                                    text = name,
-                                    selection = TextRange(name.length, name.length)
-                                )
-                            }
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
 fun InventarioPrediosPreview(){
     val navController = rememberNavController()
     InventarioPredios(navController)
+}
+
+suspend fun obtenerTodosLosPredios(): List<Predio> {
+    return obtenerDatosPredio()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun filtrarTipoPredio() {
+    var isExpanded by remember { mutableStateOf(false) }
+    var gender by remember { mutableStateOf("") }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
+        ExposedDropdownMenuBox(
+            expanded = isExpanded,
+            onExpandedChange = { isExpanded = it}
+        ) {
+            TextField(
+                value = gender,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                modifier = Modifier.menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = isExpanded,
+                onDismissRequest = { isExpanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Text(text = "Condominio") },
+                    onClick = {
+                        gender = "Condominio"
+                        isExpanded = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(text = "Residencial") },
+                    onClick = {
+                        gender = "Residencial"
+                        isExpanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun TarjetaPredio(predio: Predio, navController: NavController) {
+
+    val elevacionDp = 8.dp
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            Text(text = "ID: ${predio.idPredio}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Tipo de Predio: ${predio.idTipoPredio}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Descripción: ${predio.descripcion}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "RUC: ${predio.ruc}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Teléfono: ${predio.telefono}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Correo: ${predio.correo}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Dirección: ${predio.direccion}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Ubigeo: ${predio.idUbigeo}")
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Row(){
+                Button(
+                    onClick = {
+                        navController.navigate(route = AppScreens.CasasPredio.route)
+                    }
+                    ,colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Blue), modifier = Modifier
+                        .width(130.dp)
+                        .height(40.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color(0x00000000),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .background(
+                            color = Color(0x00000000),
+                            shape = RoundedCornerShape(size = 16.dp)
+                        )
+                        .fillMaxWidth()
+                ){
+                    Text("Mostrar Casas", color = White, fontSize = 10.sp)
+                }
+                Button(
+                    onClick = {
+                        navController.navigate(route = AppScreens.EditarPredio.route)
+                    }
+                    ,colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White), modifier = Modifier
+                        .width(105.dp)
+                        .height(40.dp)
+                        .padding(start = 25.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color(0x00000000),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .background(
+                            color = Color(0x00000000),
+                            shape = RoundedCornerShape(size = 16.dp)
+                        )
+                        .fillMaxWidth()
+                ){
+                    Text("Editar", color = Black, fontSize = 10.sp)
+                }
+                Button(
+                    onClick = {
+
+                    }
+                    ,colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red), modifier = Modifier
+                        .width(105.dp)
+                        .height(40.dp)
+                        .padding(start = 5.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color(0x00000000),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .background(
+                            color = Color(0x00000000),
+                            shape = RoundedCornerShape(size = 16.dp)
+                        )
+                        .fillMaxWidth()
+                ){
+                    Text("Eliminar", color = White, fontSize = 10.sp)
+                }
+            }
+        }
+
+    }
 }

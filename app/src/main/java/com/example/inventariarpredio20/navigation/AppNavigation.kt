@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
+import com.example.inventariarpredio20.data.repository.PredioIdSingleton
 import com.example.inventariarpredio20.screens.CasasPredio
 import com.example.inventariarpredio20.screens.EditarCasa
 import com.example.inventariarpredio20.screens.EditarPredio
@@ -13,6 +14,7 @@ import com.example.inventariarpredio20.screens.PantallaInicio
 import com.example.inventariarpredio20.screens.RegistrarAreaComun
 import com.example.inventariarpredio20.screens.RegistrarDepa
 import com.example.inventariarpredio20.screens.RegistrarUVM
+
 
 @Composable
 fun AppNavigation(){
@@ -32,7 +34,8 @@ fun AppNavigation(){
         }
 
         composable(route= AppScreens.CasasPredio.route){
-            CasasPredio(navController)
+            val idPredio = PredioIdSingleton.idPredio
+            CasasPredio(navController, idPredio)
         }
         composable(route= AppScreens.EditarCasa.route){
             EditarCasa(navController)
@@ -45,3 +48,4 @@ fun AppNavigation(){
         }
     }
 }
+

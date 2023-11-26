@@ -1,6 +1,7 @@
 package com.example.inventariarpredio20.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -62,11 +63,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.inventariarpredio20.data.repository.PredioIdSingleton
 import com.example.inventariarpredio20.data.repository.PredioRepository.filtrarPredios
 import com.example.inventariarpredio20.data.repository.PredioRepository.obtenerDatosPredio
 import com.example.inventariarpredio20.models.Predio
 import com.example.inventariarpredio20.navigation.AppScreens
-
+import java.io.BufferedReader
+import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -236,7 +241,7 @@ fun ContenidoInventarioPredios(navController: NavController){
                     cargando.value = true
                 }
                 ,colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.DarkGray), modifier = Modifier
+                containerColor = Color.DarkGray), modifier = Modifier
                     .width(150.dp)
                     .height(40.dp)
                     .padding(start = 15.dp)
@@ -344,7 +349,7 @@ fun filtrarTipoPredio() {
 
 @Composable
 fun TarjetaPredio(predio: Predio, navController: NavController) {
-
+    val context = LocalContext.current
     val elevacionDp = 8.dp
     Card(
         modifier = Modifier
@@ -375,6 +380,8 @@ fun TarjetaPredio(predio: Predio, navController: NavController) {
             Row(){
                 Button(
                     onClick = {
+                        val idPredio = predio.idPredio.toString()
+                        PredioIdSingleton.idPredio = idPredio
                         navController.navigate(route = AppScreens.CasasPredio.route)
                     }
                     ,colors = ButtonDefaults.buttonColors(
@@ -441,5 +448,36 @@ fun TarjetaPredio(predio: Predio, navController: NavController) {
             }
         }
 
+        }
+}
+
+/* Almacenar el idPredio en un archivo de texto
+fun guardarIdPredioEnArchivo(idPredio: String) {
+    val filePath = "data/repository/id_predio.txt" // Ruta relativa dentro de tu proyecto
+
+    try {
+        val file = File(filePath)
+        file.parentFile?.mkdirs() // Crea los directorios si no existen
+
+        file.writeText(idPredio) // Escribe el ID en el archivo
+    } catch (e: IOException) {
+        // Manejo de errores al escribir en el archivo
+        e.printStackTrace()
     }
 }
+
+
+// Recuperar el idPredio desde el archivo de texto
+fun obtenerIdPredioDesdeArchivo(): String {
+    val filePath = "data/repository/id_predio.txt" // Ruta relativa dentro de tu proyecto
+
+    return try {
+        val file = File(filePath)
+        file.readText() // Lee el contenido del archivo y devuelve el ID
+    } catch (e: IOException) {
+        // Manejo de errores al leer el archivo
+        e.printStackTrace()
+        ""
+    }
+}
+*/

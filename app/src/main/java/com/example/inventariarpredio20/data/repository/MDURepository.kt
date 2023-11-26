@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.max
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object MDURepository {
 
@@ -38,6 +39,7 @@ object MDURepository {
                 it[descripcion] = mdu.descripcion
                 it[direccion] = mdu.direccion
                 it[numero] = mdu.numero
+                it[totalCasas] = 0
             }
         }
     }
@@ -46,6 +48,24 @@ object MDURepository {
         return db.dbQuery {
             MDUTable.select { MDUTable.descripcion eq nombreTipoMDU }
                 .singleOrNull()?.get(MDUTable.idMDU)
+        }
+    }
+
+    suspend fun obtenerPredioMDUPorIdMDU(idMDU: String): List<PredioMDU> {
+        return transaction {
+            PredioMDUTable.select {
+                PredioMDUTable.idMDU eq idMDU.toInt()
+            }.map { row ->
+                PredioMDU(
+                    idPredioMDU = row[PredioMDUTable.idPredioMDU],
+                    idPredio = row[PredioMDUTable.idPredio],
+                    idMDU = row[PredioMDUTable.idMDU],
+                    descripcion = row[PredioMDUTable.descripcion],
+                    direccion = row[PredioMDUTable.direccion],
+                    numero = row[PredioMDUTable.numero],
+                    totalCasas = row[PredioMDUTable.totalCasas]
+                )
+            }
         }
     }
 

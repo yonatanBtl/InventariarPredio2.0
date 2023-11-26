@@ -89,7 +89,7 @@ fun Contenido(navController: NavController){
             Spacer(modifier = Modifier.height(20.dp))
             /** boton Registrar UVM**/
             Button(onClick = {
-                             navController.navigate(route = AppScreens.RegistrarUVM.route)
+                navController.navigate(route = AppScreens.RegistrarUVM.route)
             }, colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White), modifier = Modifier
                 .width(300.dp)

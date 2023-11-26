@@ -318,12 +318,15 @@ fun ContenidoRegistrarDepa(navController: NavController){
 
                         GlobalScope.launch {
                             var idPredio = obtenerIdPredioSeleccionadoDep(nombrePredioSeleccionado) ?: 0
-                            var estadoCasa = obtenerEstadoDep(nombreEstadoCasaSeleccionado)?: 0
+                            var estadoCasa = obtenerEstadoDep(nombreEstadoCasaSeleccionado)?: 1
 
                             val numeroCasa = textValue3.toShortOrNull() ?: 0
                             val pisoCasa = textValue4.toShortOrNull() ?: 0
                             val areaCasa = textValue5.toBigDecimalOrNull() ?: BigDecimal.ZERO
                             val participacionCasa = textValue6.toBigDecimalOrNull() ?: BigDecimal.ZERO
+
+                            val idCasa = 1
+                            val idPredioMdu = 1
 
                             // verificamos que datos se guardaran en la base de datos
                             Log.d("Data", "$idPredio")
@@ -334,7 +337,7 @@ fun ContenidoRegistrarDepa(navController: NavController){
                             Log.d("Data", "$participacionCasa")
 
                             //Crear el objeto AreaComun con los valores
-                            val casa = PredioCasa(idPredio, estadoCasa, numeroCasa, pisoCasa, areaCasa, participacionCasa)
+                            val casa = PredioCasa(idCasa, idPredio, estadoCasa, idPredioMdu, numeroCasa, pisoCasa, areaCasa, participacionCasa)
 
                             //Guardar el área común utilizando el repositorio
                             CasaRepository.guardarDep(casa)

@@ -288,6 +288,9 @@ fun ContenidoRegistrarUVM(navController: NavController){
                             val direccionMDU = textValue4
                             val numeroMDU = textValue5
 
+                            val idPredioMDU = 1
+                            val totalCasas = 1
+
                             // verificamos que datos se guardaran en la base de datos
                             Log.d("Data", "$idPredio")
                             Log.d("Data", "$tipoMDU")
@@ -296,7 +299,7 @@ fun ContenidoRegistrarUVM(navController: NavController){
                             Log.d("Data", "$numeroMDU")
 
                             //Crear el objeto AreaComun con los valores
-                            val mdu = PredioMDU(idPredio, tipoMDU, descripcionMDU, direccionMDU, numeroMDU)
+                            val mdu = PredioMDU(idPredioMDU, idPredio, tipoMDU, descripcionMDU, direccionMDU, numeroMDU, totalCasas)
 
                             // Guardar el área común utilizando el repositorio
                             MDURepository.guardarMDU(mdu)

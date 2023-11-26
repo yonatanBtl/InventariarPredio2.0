@@ -23,6 +23,7 @@ object CasaRepository {
         }
     }
 
+
     suspend fun guardarDep(casa: PredioCasa) {
         val UltimoIdCasa = db.dbQuery {
             CasaTable
